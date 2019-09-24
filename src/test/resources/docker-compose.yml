@@ -1,0 +1,68 @@
+version: '2'
+services:
+  cass:
+    image: cassandra:3.11.3
+    restart: "no"
+    container_name: cass
+    ports:
+      - "9042:9042"
+    env_file:
+      - .env
+    environment:
+      - "CASSANDRA_BROADCAST_ADDRESS=cass"
+      - "CASSANDRA_LISTEN_ADDRESS=cass"
+      - "JVM_OPTS=${CASS_JVM_OPTS}"
+    volumes:
+      - ${DATA_DIR}/cassandra:/var/lib/cassandra
+      - ${DATA_DIR}/cass-logs:/var/log/cassandra
+    networks:
+      default:
+        ipv4_address: 10.0.1.10
+  es:
+    image: 354215089767.dkr.ecr.us-east-1.amazonaws.com/elasticsearch:6.7.1
+    restart: "no"
+    container_name: es
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    command: "elasticsearch -Ecluster.name=elasticsearch-cluster -Ediscovery.zen.ping.unicast.hosts=es -Enode.name=es -Epath.repo=/usr/share/elasticsearch/snapshots"
+    env_file:
+      - .env
+    environment:
+      - "ES_JAVA_OPTS=${ES_JVM_OPTS}"
+    ulimits:
+      nproc: 65536
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ${DATA_DIR}/elasticsearch-v6/data:/usr/share/elasticsearch/data
+      - ${DATA_DIR}/elasticsearch-v6/snapshots:/usr/share/elasticsearch/snapshots
+      - ${DATA_DIR}/elasticsearch-v6/logs:/var/log/elasticsearch
+    extra_hosts:
+      - "cass:10.0.1.10"
+      - "es:10.0.1.20"
+    networks:
+      default:
+        ipv4_address: 10.0.1.20
+  oracle:
+    image: 354215089767.dkr.ecr.us-east-1.amazonaws.com/oracle
+    restart: "no"
+    container_name: oracle
+    env_file:
+      - .env
+    environment:
+      - "ORACLE_ALLOW_REMOTE=true"
+      - "ORACLE_ENABLE_XDB=true"
+    ports:
+      - "1521:1521"
+    volumes:
+      - ${DATA_DIR}/oracle:/u01/app/oracle
+    networks:
+      default:
+        ipv4_address: 10.0.1.30
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: "10.0.1.0/25"
