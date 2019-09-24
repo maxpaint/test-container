@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    id 'idea' // optional (to generate IntelliJ IDEA project files)
+}
+
+sourceCompatibility = '8'
+targetCompatibility = '8'
+
+repositories {
+    mavenCentral()
+}
+
+def jacksonVersion = "2.9.9";
+def slf4jVersion = "1.7.28";
+def logbackVersion = "1.2.3";
+
+dependencies {
+    compile "io.github.cdimascio:java-dotenv:5.1.1"
+    compile "io.rest-assured:json-path:4.1.1"
+    compile "io.rest-assured:json-schema-validator:4.1.1"
+    compile "io.rest-assured:rest-assured:4.1.1"
+    compile 'org.apache.commons:commons-csv:1.7'
+
+    compile "org.slf4j:slf4j-api:${slf4jVersion}"
+    compile "ch.qos.logback:logback-classic:1.2.3"
+    compile "ch.qos.logback:logback-core:1.2.3"
+    testCompile "ch.qos.logback:logback-classic:1.2.3"
+    testCompile "org.testcontainers:testcontainers:1.12.1"
+
+    compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    compile "com.fasterxml.jackson.module:jackson-module-jsonSchema:${jacksonVersion}"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:5.5.2"
+    testImplementation "org.awaitility:awaitility:4.0.1"
+
+    compileOnly "org.projectlombok:lombok:1.18.10"
+    annotationProcessor "org.projectlombok:lombok:1.18.10"
+
+
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+compileJava {
+    options.incremental = true
+    options.fork = true
+    options.failOnError = true
+}
